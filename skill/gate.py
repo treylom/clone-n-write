@@ -134,10 +134,12 @@ def base_provenance(base_token, base_raw):
     low_path = base_file.lower()
     blockish = has_block_markers(txt)
     author_is_bot = any(h in author.lower() for h in BOT_AUTHOR_HINTS)
-    author_is_tofu = 'the-author' in author.lower() or '재경' in author and not author_is_bot
+    # AUTHOR_NAME_HINTS: add the author's real-name variants for your deployment
+    AUTHOR_NAME_HINTS = ('the-author',)
+    author_is_author = any(h in author.lower() for h in AUTHOR_NAME_HINTS) and not author_is_bot
     path_published = any(h in low_path for h in PUBLISHED_PATH_HINTS)
     # base_ok: the author 발행본 신호(author the-author 또는 발행경로) AND 봇 블록마커 아님
-    ok = (author_is_tofu or (path_published and not author_is_bot)) and not blockish
+    ok = (author_is_author or (path_published and not author_is_bot)) and not blockish
     why = f"author={author} path_published={path_published} blockmarkers={blockish} author_is_bot={author_is_bot}"
     return base_file, author, ok, why
 
