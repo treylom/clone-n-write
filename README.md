@@ -1,92 +1,168 @@
 # clone-n-write
 
-**Clone how a real person thinks while writing — then use the same machinery to coach them to write better.**
+![clone-n-write hero](assets/hero.png)
 
-Most "write in my style" prompts imitate word choice and die in the uncanny valley: the vocabulary matches, the *thinking* doesn't. clone-n-write goes after the process instead — how the author picks a direction, outlines by genre, borrows from their own published work while drafting, and self-edits — and verifies the surface style **with code, not vibes**, at the end.
+**실제 사람이 글을 쓸 때의 사고 과정을 복제하고 — 같은 기계로 그 사람이 글을 더 잘 쓰도록 코칭한다.**
 
-```
- your published texts                        a new draft
-        │                                         │
-        ▼                                         ▼
- build_corpus.py ──▶ corpus + per-genre     type_profiler.py (genre?)
-        │            stats (private,              │
-        │            gitignored)                  ▼
-        │                                 outline-playbooks.md
-        │                                 (outline BEFORE prose — hard gate)
-        │                                         │
-        │                                         ▼
-        └──────────▶ quant_scorer.py ◀── draft ──▶ rewrite_loop.py
-                     (3-axis fingerprint,          (gold-anchored)
-                      band + why + coach)                │
-                                                         ▼
-                                                      gate.py
-                                          (4-axis pre-publish gate:
-                                           endings · borrow-quotes ·
-                                           provenance · AI-cliché tiers)
-```
-
-Two goals, in order:
-
-1. **Imitate the thinking, not just the surface.** Most "style copy" prompts imitate word choice. This toolkit imitates the *writing process* — how the author picks a direction, outlines by genre, drafts by borrowing from their own published work, and self-edits — with the surface style (endings, rhythm, markers) verified at the end, by code.
-2. **Coach, don't just clone.** Every measured target ships with a *why*. The scorer's output is not a number but a diagnosis: "your draft's sentence-length variance is 0.91; this genre's fingerprint is 0.55–0.72 — even out the breathing."
-
-Built and used daily for one real author's Threads/longform output (that private corpus is **not** in this repo); published here as the generalized machinery.
-
-## What coaching looks like
-
-The scorer never says `72/100`. It reads the pack (per-genre fingerprint bands measured from the author's real corpus) and emits a diagnosis per metric:
+"내 문체로 써줘" 류의 프롬프트 대부분은 어휘만 흉내 내다가 어색한 골짜기에 빠집니다. 단어는 비슷한데 *생각의 결*이 다르기 때문입니다. clone-n-write는 과정을 겨냥합니다 — 저자가 방향을 고르고, 장르별로 개요를 짜고, 자기 발행글에서 차용하며 초고를 쓰고, 스스로 퇴고하는 그 과정을 — 그리고 표면 문체는 마지막에 **감이 아니라 코드로** 검증합니다.
 
 ```
-[sentence-rhythm] your variance 0.91 · this genre's band 0.55–0.72
-  why   : this author breathes in mid-length bursts; long-short whiplash reads as "assistant voice"
-  coach : split the 3 longest sentences; keep one long sentence per paragraph at most
-
-[question-ratio] your 0% · band 4–11%
-  why   : rhetorical questions are how this author hands the topic to the reader
-  coach : turn one flat assertion in the intro into a question
+ 저자의 발행글                                새 초고
+      │                                         │
+      ▼                                         ▼
+ build_corpus.py ──▶ 코퍼스 + 장르별       type_profiler.py (장르 판별)
+      │              통계 (비공개,               │
+      │              gitignore)                  ▼
+      │                                 outline-playbooks.md
+      │                                 (산문보다 개요 먼저 — 하드 게이트)
+      │                                         │
+      │                                         ▼
+      └──────────▶ quant_scorer.py ◀── 초고 ──▶ rewrite_loop.py
+                   (3축 지문 채점,               (황금 앵커 기준)
+                    대역 + 왜 + 코칭)                 │
+                                                      ▼
+                                                   gate.py
+                                        (발행 전 4축 게이트:
+                                         어미 분포 · 차용 인용 ·
+                                         원본 출처 · AI 상투어 2단)
 ```
 
-Band + why + coach, all generated from measured data — never from generic writing folklore.
+## 실전 검증 (2026-07)
 
-## What's inside
+같은 중립 원고 1편을 서로 다른 두 저자의 문체로 변환하고, 각 저자의 코퍼스에서 잰 지문 대역(밴드)으로 교차 채점한 결과:
 
-| piece | what it does |
+| | 저자 A 지문 점수 | 저자 B 지문 점수 |
+|---|---|---|
+| 원본 (중립 리포트체) | 62.0 | 45.2 |
+| 저자 A 문체 변환 | **89.3** (실글 상위 21%) | 70.7 |
+| 저자 B 문체 변환 | 83.0 | **89.5** (실글 상위 19%) |
+
+각 변환본이 목표 저자 지문에서 최고점 + 교차 지문에서 하락 — 판별이 성립합니다. 1차 초안은 "합니다체 54% (저자 대역 상한 30%)"로 **반려**됐고 — AI 특유의 격식 도배였습니다 — 진단문의 코칭대로 고친 v2가 수렴했습니다. 측정 → 반려 → 코칭 → 수렴 루프가 실제로 돕니다.
+
+## 코칭이 실제로 어떻게 나오나
+
+채점기는 `72/100` 같은 점수를 내지 않습니다. 저자의 실제 코퍼스에서 측정한 장르별 지문 대역을 읽고, 지표마다 진단문을 냅니다:
+
+```
+[문장 리듬] 당신의 변동계수 0.91 · 이 장르 대역 0.55–0.72
+  왜   : 이 저자는 중간 길이 호흡으로 씁니다. 길고-짧음이 널뛰면 "AI 목소리"로 읽힙니다
+  코칭 : 가장 긴 문장 3개를 쪼개세요. 긴 문장은 문단당 1개까지만
+
+[질문 비율] 당신의 0% · 대역 4–11%
+  왜   : 수사적 질문은 이 저자가 화제를 독자에게 건네는 방식입니다
+  코칭 : 도입부의 단정 하나를 질문으로 바꿔 보세요
+```
+
+대역 + 왜 + 코칭 — 전부 측정 데이터에서 나오고, 일반적인 "글쓰기 요령"에서 나오지 않습니다.
+
+## 모드 안내
+
+### `gate.py`의 두 모드 — 목적이 다르면 잣대도 다르다
+
+| 모드 | 언제 | 무엇이 다른가 |
+|---|---|---|
+| `--mode copy` (기본) | **저자 모방 충실도**가 목표일 때 — 그 사람 명의로 나갈 글 | 저자의 실제 습관은 일반 작문 규범에 어긋나도 **허용**. AI 상투어 검사도 "저자 코퍼스에 실제로 없는 표현"만 하드 차단(2단: 코퍼스 0회 = 즉시 반려 / 저자도 쓰는 표현 = 빈도 상한만) |
+| `--mode universal` | **보편적으로 좋은 글**이 목표일 때 — 명의 없는 일반 원고 | 더 엄격한 일반 규범 적용. 저자 습관 면책이 없음 |
+
+```bash
+python3 gate.py draft.md                      # copy 모드 (기본)
+python3 gate.py draft.md --mode universal     # 보편 윤문 모드
+python3 gate.py draft.md --ts 2026-07-03T12:00:00+09:00   # 실행 시각 스탬프
+# 산출: draft.md.stylegate.json (pass 여부 + 축별 판정 + 사유)
+```
+
+### `type_profiler.py`의 장르 프로파일
+
+같은 저자라도 장르마다 지문이 다릅니다(사색글과 정보글의 어미 분포는 서로 다른 사람 수준으로 갈립니다). 프로파일은 코퍼스에서 장르별로 캘리브레이션하며, 판별은 선언된 라벨이 아니라 **어미 분포 최근접(nearest-centroid)** 으로 합니다:
+
+```bash
+python3 type_profiler.py     # 데모: 샘플 문장의 장르 판별 + 대역 이탈 진단
+```
+
+### `rewrite_loop.py`의 합성 판정
+
+정량(어미·연결·시그니처 3축) + 정성(다중 심사: 독자 시점·페르소나·사실 구조)을 합성해 "다음에 어느 축을 고칠지"를 지시합니다:
+
+```bash
+python3 rewrite_loop.py      # 데모: 합성 점수 + 다음 퇴고 가이드
+```
+
+## 구성 요소
+
+| 파일 | 역할 |
 |---|---|
-| `skill/outline-playbooks.md` | genre-typed outline templates + a hard "outline before prose" gate + 4-lens review (structural / reader / skeptic / voice) |
-| `skill/gate.py` | pre-publish gate, 4 axes: ending-distribution guard (no assistant-voice flooding), borrow-quote check, base-provenance, **AI-cliché reverse detection** (two tiers: hard clichés that never appear in the author's corpus vs. capped ones that do) |
-| `skill/build_corpus.py` | distills the author's published texts into a corpus + per-genre stats (you point it at your own sources) |
-| `skill/type_profiler.py` | genre classification from ending-form distribution (stdlib only, no morphological analyzer) |
-| `skill/quant_scorer.py` · `rewrite_loop.py` | quantitative 3-axis scoring + gold-anchored rewrite loop |
-| `skill/connective_lib.py` | connective-tissue patterns (forward cues, pickups, bookends) with synthetic examples |
-| `skill/check_endings.py` · `humanize_whitelist.py` · `check_corpus_phrases.py` | the smaller guards: ending counter, signature-protection during humanize passes, collocation-based bot-tell detection |
-| `skill/multibot_judge.py` | multi-judge qualitative review prompt builder (fact-checker / reader-POV / style roles) |
-| `skill/test_*.py` | runnable specs for all of the above (7 suites) |
+| `skill/SKILL.md` | 8단계 집필 파이프라인 정본 (장르 판별 → 개요 → 개요 승인 게이트 → 차용 초고 → 4렌즈 리뷰 → 정량 패스 → 최종 게이트) |
+| `skill/outline-playbooks.md` | 장르별 개요 템플릿 + "산문보다 개요 먼저" 하드 게이트 + 4렌즈(구조/독자/회의론자/목소리) 리뷰 |
+| `skill/gate.py` | 발행 전 4축 게이트 — 어미 분포 가드 · 차용 인용 확인 · 원본 출처(저자 발행본 유래) · AI 상투어 2단 검출 |
+| `skill/build_corpus.py` | 저자 발행글 → 코퍼스 + 장르별 통계 증류 (소스는 각자 지정, 코퍼스는 비공개 유지) |
+| `skill/type_profiler.py` | 어미 분포 기반 장르 판별 (표준 라이브러리만, 형태소 분석기 불요) |
+| `skill/quant_scorer.py` · `rewrite_loop.py` | 정량 3축 채점 + 황금 앵커 기준 퇴고 루프 |
+| `skill/band_scorer.py` | 코퍼스 대역 지문 채점기 — raw 점수 + **저자 실글 분포 백분위** + 실글 p25 캘리브레이션 컷 + 과잉 전형성 경고 + 표본 부족 시 판정 거부 |
+| `skill/connective_lib.py` | 연결 조직 패턴(예고·회수·수미상관) + 합성 예문 |
+| `skill/check_endings.py` · `humanize_whitelist.py` · `check_corpus_phrases.py` | 보조 가드: 어미 카운터 · 윤문 시 시그니처 보호 · 연어 기반 봇 말투 검출 |
+| `skill/multibot_judge.py` | 다중 심사 프롬프트 빌더 (사실검증 / 독자 시점 / 문체 역할) |
+| `skill/test_*.py` | 실행 가능한 스펙 8종 |
 
-Everything is Python stdlib. No API calls inside the toolkit itself — it's the deterministic layer around whatever model does the drafting.
+전부 Python 표준 라이브러리입니다. 도구 자체는 API를 호출하지 않습니다 — 초고를 쓰는 모델이 무엇이든, 그 둘레의 결정론적 검증 층입니다.
 
-## What you need to bring
+## 사용법 — 처음부터 끝까지
 
-This repo ships the **machinery, not the person**. To use it for a real persona you supply:
-
-1. **A published corpus** — the author's actual published texts (not AI drafts). Point `build_corpus.py` at your sources; it emits `corpus/` (gitignored here).
-2. **Genre profiles** — run the profiler over your corpus to calibrate per-genre ending distributions and style bands.
-3. **Your names and paths** — placeholders like `PERSONA_VAULT_ROOT`, `BOT_AUTHOR_HINTS`, `<your-deck-dir>` mark every spot.
-
-## Method notes (why it works)
-
-- **Ending forms over word choice.** In Korean, sentence-ending forms (합니다체/해요체/평어/음슴체) are the strongest genre fingerprint — measured z-scores of +1.5 to +1.8 on a 1,000+ post corpus. Function-word and ending fingerprints are hard to consciously fake, which is exactly why they're good persona signals (the Burrows' Delta insight, applied to Korean).
-- **Two-tier AI-cliché detection.** Naive "banned phrase" lists break persona fidelity: many alleged AI-tells actually appear in real human corpora. Tier 1 = phrases with **zero** occurrences in the author's corpus (hard fail). Tier 2 = phrases the author does use (allowed, frequency-capped). Build both tiers from *your* corpus, not from folklore.
-- **Copy mode vs. universal mode.** Full-fidelity persona copying (`--mode copy`) tolerates the author's own quirks even where generic "good writing" advice wouldn't; `--mode universal` is the stricter general-purpose variant. Personal fidelity and universal polish are different objectives — pick one per run.
-- **Outline first, always.** The single highest-leverage gate is refusing to draft before a genre-typed outline is approved. For new pieces the outline itself is built interactively (2–3 direction candidates → author picks → template-filled draft outline → author refines).
-
-## Quickstart
+### 0. 동작 확인 (코퍼스 없이)
 
 ```bash
 cd skill
-for t in test_*.py; do python3 "$t"; done   # 7 suites, all green, no corpus needed
+for t in test_*.py; do python3 "$t"; done   # 8종 전부 green
 ```
 
-Then wire your corpus (`build_corpus.py`), calibrate profiles, and put `gate.py` at the end of your drafting pipeline.
+### 1. 코퍼스 구축 (저자 1인당 1회)
+
+1. `build_corpus.py`를 저자의 **발행글**(AI 초안 ❌)에 연결해 실행 → `corpus/` 생성(이 레포에선 gitignore).
+2. 캘리브레이션 체크리스트(SKILL.md):
+   - [ ] `type_profiler.PROFILES`의 장르별 어미 분포를 코퍼스에서 잰 값으로 교체
+   - [ ] AI 상투어 2단 구축 — 코퍼스 0회 표현 = 하드 티어 / 저자도 쓰는 표현 = 빈도 상한 티어. **남의 금지어 목록이 아니라 당신 코퍼스에서** 만드세요
+   - [ ] `BOT_AUTHOR_HINTS`·`AUTHOR_NAME_HINTS`·`PERSONA_VAULT_ROOT` 등 경로/이름 자리 채우기
+   - [ ] 장르별 대역(어미 %·문장길이 변동계수·마커 빈도) 측정 + **왜 그 값이 그 장르의 지문인지** 기록 — 왜가 없는 숫자는 목표가 아니라 소음입니다
+
+### 2. 글쓰기 파이프라인 (8단계 — SKILL.md 정본)
+
+1. **장르 판별** → 2. **개요 작성**(신규 글은 방향 후보 2–3개 제시 → 저자 선택 → 템플릿 채움) → 3. **작법 점검**(개요가 어떤 "좋은 도입"을 쓰고 어떤 "흔한 실패"를 피하는지 명명) → 4. **개요 승인 — 하드 게이트**(승인 전 산문 금지) → 5. **차용 초고**(같은 장르 발행글 2–3편에서 도입·연결·마무리 수법 차용) → 6. **4렌즈 리뷰**(구조→독자→회의론자→목소리 순, 목소리는 마지막) → 7. **정량 패스**(`quant_scorer.py`+`check_endings.py` — 대역 대비 진단) → 8. **최종 게이트**(`gate.py`).
+
+### 3. 발행 전 게이트
+
+```bash
+python3 gate.py my-draft.md --mode copy
+cat my-draft.md.stylegate.json   # pass: true 여야 발행
+```
+
+### 4. 대역 채점 (band_scorer)
+
+```bash
+# 밴드 구축 (저자 실글 점수 분포까지 캘리브레이션 — 1회)
+python3 band_scorer.py build corpus.jsonl author-band.json
+# 초고 채점
+python3 band_scorer.py score my-draft.txt author-band.json
+# → raw 점수 + percentile_vs_author("실글 대비 상위 몇 %") + pass_hint(실글 p25 컷) + over_typical(실글 p90 초과 = 과잉 전형성 경고)
+```
+
+## 알려진 한계 (2026-07 다회 스트레스 테스트 실측)
+
+같은 기계를 서로 다른 두 저자 코퍼스(530편/209편)에 적용해 5축으로 공격한 결과를 그대로 적습니다:
+
+1. **절대 점수는 함정이다.** 저자 본인의 발행글도 절반이 "대역 중앙" 기준 85점을 못 넘습니다(자연 분산). 그래서 `band_scorer`는 백분위·실글 캘리브레이션 컷·과잉 전형성 경고로 보고합니다 — 점수 하나만 뽑아 쓰지 마세요.
+2. **정량 지표는 내용에 무감합니다.** 지표만 흉내 낸 무의미한 글이 실글 하위 25% 이상의 점수를 받습니다. 정성 심사(4렌즈 리뷰·`multibot_judge`)와의 합성 없이 단독 합격 판정에 쓰면 뚫립니다 — 모든 채점 출력에 이 경고가 박혀 있는 이유.
+3. **짧은 글은 판정하지 않습니다.** 문장 8개 미만은 분포 지표가 무의미해 점수 대신 `insufficient_sample`을 반환합니다.
+4. **전장르 통합 밴드는 "저자"가 아니라 "저자×주류 장르"를 잽니다.** 유머 위주 코퍼스의 밴드로 정서 글을 재면 저자 본인 문체도 남의 글처럼 나옵니다. 장르별로 코퍼스를 나눠 밴드를 만드는 것이 정답입니다.
+5. **어미 검출은 표면형 정규식**이라 교착어 결합형을 일부 놓칩니다 — 같은 자를 양쪽에 적용하는 상대 비교에서만 공정합니다.
+
+## 방법론 노트 (왜 이렇게 만들었나)
+
+- **어휘가 아니라 어미.** 한국어에서 문장 종결형(합니다체/해요체/평어/음슴체) 분포는 가장 강한 장르·저자 지문입니다 — 1,000편+ 코퍼스에서 z-점수 +1.5~+1.8 실측. 기능어·어미 지문은 의식적으로 꾸미기 어렵기 때문에 좋은 신호입니다(Burrows' Delta의 통찰을 한국어에 적용).
+- **AI 상투어 목록은 폴클로어가 아니라 코퍼스에서.** 흔히 도는 "AI 티 나는 표현" 목록의 상당수는 실제 사람 코퍼스에도 나옵니다. 무턱대고 금지하면 모방 충실도가 깨집니다 — 그래서 2단.
+- **개요 먼저, 항상.** 가장 레버리지 큰 게이트 하나를 꼽으라면: 장르 개요가 승인되기 전에 산문을 쓰지 않는 것.
+
+## English
+
+영문 요약과 원문 문서는 [README.en.md](README.en.md)에 있습니다.
 
 ## License
 
