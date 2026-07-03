@@ -82,8 +82,48 @@ THREADS_CHROME = re.compile(r'\n\s*(Translate|Top|View activity|Reply to|No repl
 def clean_threads(t):
     t = THREADS_CHROME.split(t, maxsplit=1)[0]         # UI chrome 이후 절단
     t = re.sub(r'^\s*\d{1,2}/\d{1,2}/\d{2,4}\s*$', '', t, flags=re.M)   # MM/DD/YY 날짜 스탬프
+    t = re.sub(r'^\s*\d{4}-\d{2}-\d{2}\s*$', '', t, flags=re.M)         # YYYY-MM-DD 날짜 스탬프
     t = re.sub(r'^\s*@\w+\s*$', '', t, flags=re.M)     # @핸들 단독 줄
     return dedup_lines(t).strip()
+
+
+def strip_cross_doc_boilerplate(docs, ratio=0.2, min_docs=5, max_len=40):
+    """코퍼스 위생 게이트 ①: 여러 편에 반복되는 짧은 줄 = 저자 산문이 아니라 UI/채널 보일러플레이트.
+
+    실측 사례(2026-07): 크롤 코퍼스 209편 중 193편(92%)의 선두에 채널명 줄과 날짜 줄이
+    남아 있었고, 문장 분리기가 그 줄들을 초단문 "문장"으로 세면서 지문 수치(문장당 어절·
+    리듬 CV·어미 분포)가 전부 왜곡됐다 — 판별 서열은 살았지만 수치가 오염.
+    같은 짧은 줄이 문서의 ratio 이상에서 반복되면 전 문서에서 제거하고 목록을 보고한다.
+    """
+    from collections import Counter
+    freq = Counter()
+    for d in docs:
+        for ln in set(l.strip() for l in d['text'].splitlines()):
+            if 0 < len(ln) <= max_len:
+                freq[ln] += 1
+    n = len(docs)
+    boiler = {ln for ln, c in freq.items() if c >= max(min_docs, int(n * ratio))}
+    if boiler:
+        for d in docs:
+            d['text'] = '\n'.join(l for l in d['text'].splitlines() if l.strip() not in boiler).strip()
+    return docs, sorted(boiler, key=lambda x: -freq[x])
+
+
+def drop_near_dups(docs, prefix=200):
+    """코퍼스 위생 게이트 ②: 정규화 앞 prefix자 동일 = 근사 중복(재크롤·고정글 재캡처)으로 드롭.
+
+    sha1 정확-중복 dedup 은 몇 글자만 달라도(조회수 숫자 등) 통과시킨다 — 실측에서
+    209편 중 8쌍이 이렇게 살아남아 밴드 분포를 이중 계수했다.
+    """
+    seen, out, dropped = set(), [], []
+    for d in docs:
+        key = re.sub(r'\s+', '', d['text'])[:prefix]
+        if key in seen:
+            dropped.append(d.get('ref', '?'))
+            continue
+        seen.add(key)
+        out.append(d)
+    return out, dropped
 
 
 def clean_alookso(raw):
@@ -215,6 +255,11 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     docs, stats = collect()
 
+    # 코퍼스 위생 게이트 (①보일러플레이트 줄 ②근사 중복) — 실측 오염 사례에서 승격
+    docs, boiler = strip_cross_doc_boilerplate(docs)
+    docs = [d for d in docs if d['text']]
+    docs, near_dropped = drop_near_dups(docs)
+
     # dedup: 동일 본문(정규화 후 sha1) 제거
     seen, uniq, dup = set(), [], 0
     for d in docs:
@@ -245,6 +290,10 @@ def main():
     print(f"   소스: Threads {stats['jsonl_threads']}편 + 얼룩소 {stats['eollukso_md']}편 "
           f"+ 슬라이드덱 {stats['slide_decks']}개(missing globs {stats['slide_missing_globs']})")
     print(f"   dedup: 중복 {dup}편 제거 → 고유 {len(uniq)}편")
+    if boiler:
+        print(f"   ⚠️ 위생 게이트: 반복 보일러플레이트 줄 {len(boiler)}종 제거 — {boiler[:5]}")
+    if near_dropped:
+        print(f"   ⚠️ 위생 게이트: 근사 중복 {len(near_dropped)}편 드롭 — {near_dropped[:5]}")
     print(f"   총 {len(text):,}자 · 인덱스 → {INDEX}")
     # 검증 샘플
     for probe in ('알맹이', '진짜 알맹이', '껍데기'):

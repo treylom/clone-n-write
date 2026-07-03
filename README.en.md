@@ -50,7 +50,7 @@ Band + why + coach, all generated from measured data — never from generic writ
 
 ## Real transformation examples
 
-The [Korean README](README.md#실제-변환-예시--같은-글이-어떻게-바뀌나) shows the full end-to-end evidence in Korean: one neutral source text transformed into two different authors' voices (scored 89.3 and 89.5 against each author's measured fingerprint band, cross-scores dropping as expected), plus the actual rejection log where draft v1 failed the ending-distribution gate ("formal endings 54.5% vs author ceiling 30%") and converged after one round of coaching. The examples are pipeline outputs — no private corpus text is published.
+The [Korean README](README.md#실제-변환-예시--같은-글이-어떻게-바뀌나) shows the full end-to-end evidence in Korean: one neutral source text transformed into two different authors' voices (scored 89.5 and 89.4 against each author's measured fingerprint band — recomputed on hygiene-cleaned corpora, cross-scores dropping as expected), plus the actual rejection log where draft v1 failed the ending-distribution gate ("formal endings 54.5% vs author ceiling 30%") and converged after one round of coaching. The examples are pipeline outputs — no private corpus text is published.
 
 ## What's inside
 
@@ -64,7 +64,7 @@ The [Korean README](README.md#실제-변환-예시--같은-글이-어떻게-바�
 | `skill/connective_lib.py` | connective-tissue patterns (forward cues, pickups, bookends) with synthetic examples |
 | `skill/check_endings.py` · `humanize_whitelist.py` · `check_corpus_phrases.py` | the smaller guards: ending counter, signature-protection during humanize passes, collocation-based bot-tell detection |
 | `skill/multibot_judge.py` | multi-judge qualitative review prompt builder (fact-checker / reader-POV / style roles) |
-| `skill/test_*.py` | runnable specs for all of the above (7 suites) |
+| `skill/test_*.py` | runnable specs for all of the above (9 suites) |
 
 Everything is Python stdlib. No API calls inside the toolkit itself — it's the deterministic layer around whatever model does the drafting.
 
@@ -81,13 +81,14 @@ This repo ships the **machinery, not the person**. To use it for a real persona 
 - **Ending forms over word choice.** In Korean, sentence-ending forms (합니다체/해요체/평어/음슴체) are the strongest genre fingerprint — measured z-scores of +1.5 to +1.8 on a 1,000+ post corpus. Function-word and ending fingerprints are hard to consciously fake, which is exactly why they're good persona signals (the Burrows' Delta insight, applied to Korean).
 - **Two-tier AI-cliché detection.** Naive "banned phrase" lists break persona fidelity: many alleged AI-tells actually appear in real human corpora. Tier 1 = phrases with **zero** occurrences in the author's corpus (hard fail). Tier 2 = phrases the author does use (allowed, frequency-capped). Build both tiers from *your* corpus, not from folklore.
 - **Copy mode vs. universal mode.** Full-fidelity persona copying (`--mode copy`) tolerates the author's own quirks even where generic "good writing" advice wouldn't; `--mode universal` is the stricter general-purpose variant. Personal fidelity and universal polish are different objectives — pick one per run.
+- **Corpus hygiene decides your numbers.** Measured in the wild: crawler-left channel/date lines at the head of 92% of one corpus plus 8 near-duplicate recaptures silently biased every fingerprint number (words/sentence, rhythm CV, ending ratios) while the discrimination ordering survived. `build_corpus.py` now ships boilerplate-line detection and near-dup dropping — watch its ⚠️ hygiene warnings when you wire a new corpus.
 - **Outline first, always.** The single highest-leverage gate is refusing to draft before a genre-typed outline is approved. For new pieces the outline itself is built interactively (2–3 direction candidates → author picks → template-filled draft outline → author refines).
 
 ## Quickstart
 
 ```bash
 cd skill
-for t in test_*.py; do python3 "$t"; done   # 7 suites, all green, no corpus needed
+for t in test_*.py; do python3 "$t"; done   # 9 suites, all green, no corpus needed
 ```
 
 Then wire your corpus (`build_corpus.py`), calibrate profiles, and put `gate.py` at the end of your drafting pipeline.
