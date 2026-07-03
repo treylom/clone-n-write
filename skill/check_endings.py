@@ -11,9 +11,9 @@
   cat draft.md | python3 check_endings.py -      # stdin
 
 유형(--type): 정보 | 사색 | 홍보 (생략 시 일반 경고만)
-  정보  = 합니다+평어 주축, 해요체 ≤25% (40-final A: 정보/튜토리얼=합니다체)
-  사색  = 평어+음슴 주축, 해요체 ≤15% (40-final A: 사색/논평=평어 ~다)
-  홍보  = 혼합 허용, 해요체 ≤45% (40-final C: 평어도입+합니다+해요 친근)
+  정보  = 합니다+평어 주축, 해요체 ≤25% (the canonical style profile A: 정보/튜토리얼=합니다체)
+  사색  = 평어+음슴 주축, 해요체 ≤15% (the canonical style profile A: 사색/논평=평어 ~다)
+  홍보  = 혼합 허용, 해요체 ≤45% (the canonical style profile C: 평어도입+합니다+해요 친근)
 
 종결체 혼용 게이트 (author policy): 정보/사색형은 한 글 안에서 종결체 일관 —
   ~습니다와 평어 ~다를 섞으면 어색. 정보=합니다 일관, 사색=평어·음슴 일관(홍보만 혼합 OK).
@@ -111,7 +111,7 @@ def main():
         print(f"[판정 — {gtype}형] 기대: {desc}, 해요체 ≤{cap}%")
         print(f"  · 주축({'+'.join(mains)}) = {main_pct:.1f}%")
         if haeyo > cap:
-            print(f"  · ⚠️ 해요체 {haeyo:.1f}% > {cap}% — 본문 도배 의심. 사색/경험=평어, 정보=합니다로 갈라쓸 것 (40-final A·E)")
+            print(f"  · ⚠️ 해요체 {haeyo:.1f}% > {cap}% — 본문 도배 의심. 사색/경험=평어, 정보=합니다로 갈라쓸 것 (the canonical style profile A·E)")
         else:
             print(f"  · ✅ 해요체 {haeyo:.1f}% ≤ {cap}% — 노선 정합")
         # 종결체 혼용 게이트 (정보/사색=한 종결체 일관, 혼용 ❌ / 홍보=혼합 OK) — author policy

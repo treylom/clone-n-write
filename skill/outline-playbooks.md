@@ -70,7 +70,7 @@
 
 ## 차용하지 않은 것 (경계 기록)
 
-- 10차원 Style Card: 우리는 40-final+코퍼스가 그 역할(이중 SoT 방지) — 도입 ❌.
+- 10차원 Style Card: 우리는 the canonical style profile+코퍼스가 그 역할(이중 SoT 방지) — 도입 ❌.
 - 6장르 전체: 스레드 4유형에 맞게 번안만. 얼룩소 장문(v5 트랙)에 확장할 땐 에세이/칼럼 주형 원본 참조.
 - persona_carve 루프: 우리 corpus 파이프라인(build_corpus.py)이 대체.
 

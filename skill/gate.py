@@ -2,7 +2,7 @@
 """
 gate.py — 저자 글 발신 전 통합 게이트.
 
-회의 root cause: 스킬 *호출은 됐는데* 핵심 step(the author 실제 글 차용)을 스킵하고 봇 중간초안을
+설계 배경: 스킬 *호출은 됐는데* 핵심 step(저자 실제 글 차용)을 스킵하고 봇 중간초안을
 base로 오인 → 봇표현 잔존. 게이트의 본질 = **"authoritative corpus grounding 강제"**.
 
 3축(robust 순):

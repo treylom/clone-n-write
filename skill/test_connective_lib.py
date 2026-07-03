@@ -3,8 +3,8 @@
 test_connective_lib.py — connective_lib 정본 하드와이어 회귀 테스트 (TDD, 표준 라이브러리만).
 
 목적(설계 결함 b 재유실 방지): 초기 버전에서 실제 글에서 추출한
-예고/받기/수미상관/경계 이음말 어휘가 정본(40-final·thread-style)에 전파되지 못하고
-한 회의 draft에만 남아 '잃어버린 fix'가 됐다. 본 테스트가 그 어휘를 코드 정본에 못박아
+예고/받기/수미상관/경계 이음말 어휘가 정본(the canonical style profile·thread-style)에 전파되지 못하고
+한 임시 문서에만 남아 유실됐던 fix다. 본 테스트가 그 어휘를 코드 정본에 못박아
 카테고리·핵심 어휘가 사라지면 CI/실행에서 즉시 RED가 나게 한다.
 
 실행: python3 test_connective_lib.py   (스킬 폴더에서)
@@ -24,7 +24,7 @@ CANON_CATEGORIES = {
     "bookend",           # 수미상관: 도입 논지 ↔ 마무리 회수
     "inter_block",       # 500자 경계 이음말(블록 전환)
     "next_part_hook",    # 다음 편 예고 훅
-    "closing_move",      # 마무리 수(후속 약속·유머 점프·커뮤니티 감사) — v3 20-qual
+    "closing_move",      # 마무리 수(후속 약속·유머 점프·커뮤니티 감사) — the qualitative analysis
 }
 
 
@@ -48,7 +48,7 @@ class TestCanonPresence(unittest.TestCase):
 
 
 class TestDetectGoldenPhrases(unittest.TestCase):
-    """합성 예시(발행 시리즈와 같은 이음 구조)가 탐지되어야 한다 (금맥 b)."""
+    """합성 예시(발행 시리즈와 같은 이음 구조)가 탐지되어야 한다 (gold-vs-draft finding b)."""
 
     def test_bookend_detected(self):
         hits = cl.detect("정리하면, 기록은 '나중의 나에게 길을 깔아 주는 일'입니다.")
@@ -67,7 +67,7 @@ class TestDetectGoldenPhrases(unittest.TestCase):
         self.assertIn("inter_block", hits)
 
     def test_closing_move_detected(self):
-        # v3 20-qual 마무리 패턴: 후속 약속 / 겸손
+        # the qualitative analysis 마무리 패턴: 후속 약속 / 겸손
         hits = cl.detect("물론 정답은 없고, 저도 계속 고쳐 나가는 중이에요.")
         self.assertIn("closing_move", hits)
 
