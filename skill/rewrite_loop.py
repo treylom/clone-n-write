@@ -21,7 +21,7 @@ MAX_ROUNDS_DEFAULT = 3
 
 # (Phase 3.6 the author 결정 = gold-anchored bar) 전역 고정 95 ❌ — "the author 발행본(gold)이 통과하는 바".
 # 장르별 gold composite(라이브 실측)에 마진 α 를 곱한 값 = 그 장르의 통과선.
-# GOLD_ANCHORS = (A)quant+(B)라이브 sonnet-5 정성 composite 로 측정한 gold 값(2026-07-02 live e2e).
+# GOLD_ANCHORS = (A)quant+(B)정성 composite 로 저자 gold 발행본에서 측정한 값(예시 — 자기 코퍼스로 재측정).
 #   측정치라 재-측정 시 갱신(경험 앵커). 미측정 장르는 DEFAULT_ANCHOR 로 보수적 fallback.
 # 정보=Threads-계열(persona 장르-fix 무관) 87.8 그대로.
 # 사색=기사·논평 장문 — Phase 3.6 persona 장르인식 재-스폰(gold persona 18→78) 후 재측정 50.6.

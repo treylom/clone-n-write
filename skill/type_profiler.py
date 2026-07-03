@@ -2,7 +2,7 @@
 """
 type_profiler.py — 글종류(장르) 판정 + 유형별 목표 분포표 (표준 라이브러리만).
 
-설계(2026-07-02 Phase 2, the author 핵심 지시 "주제마다 다르다"):
+설계(author policy "주제마다 다르다"):
   단일 rubric ❌ → 글종류를 먼저 판정하고 그 종류의 목표 분포로 채점·생성한다.
   종결어미 caps 는 check_endings.py TYPE_RULE 과 정합(정보25/사색15/홍보45).
 

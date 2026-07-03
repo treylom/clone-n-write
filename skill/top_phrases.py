@@ -2,7 +2,7 @@
 """
 top_phrases.py — the author(the-author) 통합 corpus의 *유형별* 최빈 표현·어미·시그니처 통계.
 
-배경(2026-07-02 persona-skill-rebuild Phase 1, orchestrator-bot dispatch / the author 핵심 지시):
+배경(설계 히스토리 — 저자 핵심 지시):
   기존 유일 자동도구 check_corpus_phrases.py는 방향이 반대(*없는* 봇티 탐지)라
   "the author이 자주 쓰는 표현"을 surface 못 함 = positive-signal void(결함 c).
   → 본 도구는 *많이 쓰는* 표현을 유형별로 집계해 생성·채점의 positive-injection 소스로 쓴다.

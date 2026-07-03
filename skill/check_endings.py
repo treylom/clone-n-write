@@ -15,7 +15,7 @@
   사색  = 평어+음슴 주축, 해요체 ≤15% (40-final A: 사색/논평=평어 ~다)
   홍보  = 혼합 허용, 해요체 ≤45% (40-final C: 평어도입+합니다+해요 친근)
 
-종결체 혼용 게이트 (the author 2026-06-26): 정보/사색형은 한 글 안에서 종결체 일관 —
+종결체 혼용 게이트 (author policy): 정보/사색형은 한 글 안에서 종결체 일관 —
   ~습니다와 평어 ~다를 섞으면 어색. 정보=합니다 일관, 사색=평어·음슴 일관(홍보만 혼합 OK).
   '설명조 AI톤'은 종결 섞기가 아니라 명사 종결·시각기호로 깬다.
 
@@ -114,12 +114,12 @@ def main():
             print(f"  · ⚠️ 해요체 {haeyo:.1f}% > {cap}% — 본문 도배 의심. 사색/경험=평어, 정보=합니다로 갈라쓸 것 (40-final A·E)")
         else:
             print(f"  · ✅ 해요체 {haeyo:.1f}% ≤ {cap}% — 노선 정합")
-        # 종결체 혼용 게이트 (정보/사색=한 종결체 일관, 혼용 ❌ / 홍보=혼합 OK) — the author 2026-06-26
+        # 종결체 혼용 게이트 (정보/사색=한 종결체 일관, 혼용 ❌ / 홍보=혼합 OK) — author policy
         peyong = (counts.get("평어단정", 0) / total * 100) if total else 0
         hamnida = (counts.get("합니다체", 0) / total * 100) if total else 0
         eumseum = (counts.get("음슴체", 0) / total * 100) if total else 0
         if gtype == "정보" and peyong > 10 and hamnida > 10:
-            print(f"  · ⚠️ 종결체 혼용 — 평어 '~다' {peyong:.0f}% + 합니다 {hamnida:.0f}% 공존. 정보형은 합니다체로 일관, 끊기는 '명사 종결'로 (~습니다/~다 섞이면 어색 — the author 2026-06-26). 40-final A")
+            print(f"  · ⚠️ 종결체 혼용 — 평어 '~다' {peyong:.0f}% + 합니다 {hamnida:.0f}% 공존. 정보형은 합니다체로 일관, 끊기는 '명사 종결'로 (~습니다/~다 섞이면 어색 — author policy)")
         elif gtype == "사색" and hamnida > 10 and (peyong + eumseum) > 10:
             print(f"  · ⚠️ 종결체 혼용 — 합니다 {hamnida:.0f}% + 평어/음슴 {peyong + eumseum:.0f}% 공존. 사색형은 평어·음슴으로 일관.")
     else:

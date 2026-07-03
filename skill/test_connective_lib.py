@@ -2,7 +2,7 @@
 """
 test_connective_lib.py — connective_lib 정본 하드와이어 회귀 테스트 (TDD, 표준 라이브러리만).
 
-목적(설계 결함 b 재유실 방지): 2026-06-13 v3에서 실제 글에서 추출한
+목적(설계 결함 b 재유실 방지): 초기 버전에서 실제 글에서 추출한
 예고/받기/수미상관/경계 이음말 어휘가 정본(40-final·thread-style)에 전파되지 못하고
 한 회의 draft에만 남아 '잃어버린 fix'가 됐다. 본 테스트가 그 어휘를 코드 정본에 못박아
 카테고리·핵심 어휘가 사라지면 CI/실행에서 즉시 RED가 나게 한다.
@@ -63,12 +63,12 @@ class TestDetectGoldenPhrases(unittest.TestCase):
         self.assertIn("forward_cue", hits)
 
     def test_inter_block_transition_detected(self):
-        hits = cl.detect("그런데 막상 저장하려고 하면, 손이 꽤 많이 갑니다.")
+        hits = cl.detect("그런데 막상 시작하려고 하면, 손이 꽤 많이 갑니다.")
         self.assertIn("inter_block", hits)
 
     def test_closing_move_detected(self):
         # v3 20-qual 마무리 패턴: 후속 약속 / 겸손
-        hits = cl.detect("물론 정답인 방법은 없고, 저도 아직 다듬어 가는 중이에요.")
+        hits = cl.detect("물론 정답은 없고, 저도 계속 고쳐 나가는 중이에요.")
         self.assertIn("closing_move", hits)
 
     def test_no_false_positive_on_plain_sentence(self):
@@ -84,7 +84,7 @@ class TestAnalyzeBlocks(unittest.TestCase):
     PUB_BLOCKS = [
         "지난 글에서 틀을 짰다면, 이제 채울 차례입니다. 어떻게 잘 채워야 할까요?",
         "도구가 기록을 잘 읽으려면, 어떻게 정리돼 있어야 할까요? 우선 안 좋은 예부터 보겠습니다.",
-        "그런데 막상 저장하려고 하면 손이 꽤 많이 갑니다.",
+        "그런데 막상 시작하려고 하면 손이 꽤 많이 갑니다.",
         "그래서 저는 작은 도구를 하나 만들어 씁니다.",
         "정리하면, 기록은 길을 까는 일입니다. 다음 편에서는 찾기를 풀어 보겠습니다.",
     ]

@@ -2,11 +2,11 @@
 """
 build_corpus.py — the author(the-author) authoritative 글 corpus 통합 빌더 (v2 — provenance+dedup+pptx).
 
-배경(2026-06-30 hard-gate 회의): 기존 corpus 단정이 data-analysis-547.jsonl(=Threads-only)만
+배경(설계 히스토리): 기존 corpus 단정이 단일 소스 산출물만
 봐서 얼룩소 어휘를 '0건→봇표현'으로 오판('알맹이' 사건). → Threads + 얼룩소를 합친 *통합 corpus*가
 phrase detector(check_corpus_phrases.py)의 정확도 선결.
 
-v2 확장 (2026-07-02 persona-skill-rebuild Phase 1, orchestrator-bot dispatch):
+v2 확장 (설계 히스토리):
   - 편별 provenance 구분자(`=== [source | label | date | ref] ===`) — 예제기반 재조립의
     "the author 실제 글 3~5편 통째 차용"이 편 경계를 요구. 기존 raw dump(구분자 0) 해소.
   - dedup: 동일 본문(sha1) 중복 제거 — 기존 corpus에 동일 블록 반복 확인됨.
@@ -24,7 +24,7 @@ import json, os, re, sys, glob, zipfile, html, hashlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VAULT = os.environ.get("PERSONA_VAULT_ROOT", ".")
-JSONL = os.path.join(VAULT, "<notes-tree>/meetings/2026-06-13-the-author-persona-reset/data-analysis-547.jsonl")
+JSONL = os.path.join(VAULT, "<your-threads-export>.jsonl")
 EOLLUKSO_DIRS = [
     os.path.join(VAULT, "<notes-tree>/<longform-dir>"),
 ]

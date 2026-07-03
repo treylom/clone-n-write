@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-gate.py — the-author 글 발신 전 통합 게이트 (2026-06-30 hard-gate 회의 산출).
+gate.py — 저자 글 발신 전 통합 게이트.
 
 회의 root cause: 스킬 *호출은 됐는데* 핵심 step(the author 실제 글 차용)을 스킵하고 봇 중간초안을
 base로 오인 → 봇표현 잔존. 게이트의 본질 = **"authoritative corpus grounding 강제"**.
@@ -26,7 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PUBLISHED_PATH_HINTS = ('threads', '-published', 'longform')  # path fragments marking published corpus files
 BOT_AUTHOR_HINTS = ('bot', 'assistant', 'agent')  # fill with your own bot/agent names
 
-# ── 4축: AI 상투구 역탐지 (gn-voice 차용, the author 확정 2026-07-03 "확실히 반영") ──
+# ── 4축: AI 상투구 역탐지 (two-tier, built from the author corpus) ──
 # 등급은 the author 코퍼스(N.NM chars (measure your own corpus)) 실측으로 분류 — 통짜 하드컷은 the author 보이스와 충돌(예: '안녕하세요' 142회).
 # HARD  = 코퍼스 출현 0 → 1회라도 나오면 FAIL (the author이 안 쓰는 순수 AI 상투구)
 # ADV   = 코퍼스 출현 있음 → 빈도비 판정: 드래프트 1k자당 비율이 코퍼스 대비 과다 + 종류 다수일 때만
@@ -42,7 +42,7 @@ def ai_tells_check(body, mode):
     adv = {t: body.count(t) for t in AI_TELLS_ADV if t in body}
     adv_fail = (len(adv) >= AI_ADV_DISTINCT_FAIL) or any(c >= AI_ADV_REPEAT_FAIL for c in adv.values())
     if mode == 'copy':
-        ok = not hard  # 개인 완전복사: the author도 쓰는 표현(ADV)은 완성도 깎여도 유지(the author 2026-07-03)
+        ok = not hard  # 개인 완전복사(copy): 저자도 쓰는 표현(ADV)은 완성도 깎여도 유지(author policy)
         note = "copy 모드 — ADV 상투구는 보이스 일부로 허용(경고만), HARD(the author 무사용)만 차단"
     else:
         ok = (not hard) and (not adv_fail)

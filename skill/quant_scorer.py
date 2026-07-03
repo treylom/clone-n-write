@@ -102,7 +102,7 @@ if __name__ == "__main__":
     import json
     demo_blocks = [
         "지난 글에서 틀을 짰다면 이제 채울 차례입니다. 어떻게 잘 채워야 할까요?",
-        "그런데 막상 저장하려면 손이 갑니다.",
+        "그런데 막상 시작하려면 손이 갑니다.",
         "정리하면, 기록은 길을 까는 일입니다. 다음 편에서는 찾기를 풀어 보겠습니다.",
     ]
     print(json.dumps(score("\n".join(demo_blocks), "정보", blocks=demo_blocks),

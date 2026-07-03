@@ -2,7 +2,7 @@
 """
 check_corpus_phrases.py — 드래프트의 collocation(구) provenance 게이트 (report-only).
 
-원리(2026-06-30 hard-gate 회의, orchestrator-bot 정정): 봇 표현 신호는 *단어*가 아니라 *콜로케이션*이다.
+원리(설계 히스토리): 봇 표현 신호는 *단어*가 아니라 *콜로케이션*이다.
   - '알맹이'(단어) = the author 실어휘 → 차단 ❌ (word-blocklist는 false-positive 제조)
   - '진짜 알맹이'(2-gram) = the author 발행 corpus 0건 → 봇 전용 → FLAG
 ∴ 통합 corpus(build_corpus.py 산출)에 *0건인 2~3그램*만 리포트한다. **report-only**(hard-block ❌).
