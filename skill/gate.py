@@ -12,7 +12,7 @@ base로 오인 → 봇표현 잔존. 게이트의 본질 = **"authoritative corp
   🥉 corpus-phrase   : check_corpus_phrases 의 distinctive 0-gram(예 '진짜 알맹이'). **advisory**
                        (한글 형태소 노이즈+stdlib 한계로 pass 차단 ❌, 사람 검토 신호로만).
 
-출력(orchestrator-bot Stop-gate hook 계약): <draft>.tofugate.json
+출력(orchestrator-bot Stop-gate hook 계약): <draft>.stylegate.json
   {base_path, base_author, base_ok, borrow_quotes:[…], corpus_flags:[…], pass:bool, schema_version, proof_class, ts}
 PASS = base_ok ∧ len(borrow_quotes)≥1.   (corpus_flags=advisory, pass 비차단)
 
@@ -208,7 +208,7 @@ def main():
         "pass_rule": "base_ok AND borrow_quotes>=1 AND ai_tells_ok (corpus_flags advisory)",
         "ts": ts,
     }
-    out_path = path + ".tofugate.json"
+    out_path = path + ".stylegate.json"
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
@@ -225,7 +225,7 @@ def main():
     print(f"\n{'🟢 PASS' if passed else '🔴 FAIL'} — {report['pass_rule']}")
     print(f"→ {out_path}")
     # orchestrator-bot Stop-gate hook 인식용 마커 (transcript stdout) — 파일만 쓰면 hook이 못 봄
-    print(f"tofugate: {json.dumps({'pass': passed, 'base_ok': base_ok, 'borrow': len(quotes), 'draft': os.path.basename(path)}, ensure_ascii=False)}")
+    print(f"stylegate: {json.dumps({'pass': passed, 'base_ok': base_ok, 'borrow': len(quotes), 'draft': os.path.basename(path)}, ensure_ascii=False)}")
     sys.exit(0 if passed else 2)
 
 if __name__ == '__main__':
