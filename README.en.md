@@ -48,6 +48,10 @@ The scorer never says `72/100`. It reads the pack (per-genre fingerprint bands m
 
 Band + why + coach, all generated from measured data — never from generic writing folklore.
 
+## Real transformation examples
+
+The [Korean README](README.md#실제-변환-예시--같은-글이-어떻게-바뀌나) shows the full end-to-end evidence in Korean: one neutral source text transformed into two different authors' voices (scored 89.3 and 89.5 against each author's measured fingerprint band, cross-scores dropping as expected), plus the actual rejection log where draft v1 failed the ending-distribution gate ("formal endings 54.5% vs author ceiling 30%") and converged after one round of coaching. The examples are pipeline outputs — no private corpus text is published.
+
 ## What's inside
 
 | piece | what it does |
