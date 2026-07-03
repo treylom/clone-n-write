@@ -1,10 +1,10 @@
 ---
-name: persona-writing-skill
+name: clone-n-write
 description: Use when drafting or reworking posts in a specific person's voice. Genre-typed outline templates + borrow-from-published-work drafting + deterministic pre-publish gates (ending distribution, AI-cliché reverse detection, provenance).
 version: 1.0.0
 ---
 
-# Persona writing skill (generalized template)
+# clone-n-write (generalized template)
 
 > **Mission**: ① flexibly imitate how a real person *thinks while writing* — direction → outline → draft → self-edit — not just their surface style; ② use the same machinery to coach the writer to write better. Every gate, template, and numeric target below is a means to those two goals, never a mechanical mandate.
 

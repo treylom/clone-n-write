@@ -1,13 +1,52 @@
-# persona-writing-skill
+# clone-n-write
 
-**A toolkit for building a *persona writing skill*: teach an AI to flexibly imitate how a real person thinks while writing — and then use that same machinery to coach the person to write better.**
+**Clone how a real person thinks while writing — then use the same machinery to coach them to write better.**
 
-That sentence is the whole design. Two goals, in order:
+Most "write in my style" prompts imitate word choice and die in the uncanny valley: the vocabulary matches, the *thinking* doesn't. clone-n-write goes after the process instead — how the author picks a direction, outlines by genre, borrows from their own published work while drafting, and self-edits — and verifies the surface style **with code, not vibes**, at the end.
+
+```
+ your published texts                        a new draft
+        │                                         │
+        ▼                                         ▼
+ build_corpus.py ──▶ corpus + per-genre     type_profiler.py (genre?)
+        │            stats (private,              │
+        │            gitignored)                  ▼
+        │                                 outline-playbooks.md
+        │                                 (outline BEFORE prose — hard gate)
+        │                                         │
+        │                                         ▼
+        └──────────▶ quant_scorer.py ◀── draft ──▶ rewrite_loop.py
+                     (3-axis fingerprint,          (gold-anchored)
+                      band + why + coach)                │
+                                                         ▼
+                                                      gate.py
+                                          (4-axis pre-publish gate:
+                                           endings · borrow-quotes ·
+                                           provenance · AI-cliché tiers)
+```
+
+Two goals, in order:
 
 1. **Imitate the thinking, not just the surface.** Most "style copy" prompts imitate word choice. This toolkit imitates the *writing process* — how the author picks a direction, outlines by genre, drafts by borrowing from their own published work, and self-edits — with the surface style (endings, rhythm, markers) verified at the end, by code.
 2. **Coach, don't just clone.** Every measured target ships with a *why*. The scorer's output is not a number but a diagnosis: "your draft's sentence-length variance is 0.91; this genre's fingerprint is 0.55–0.72 — even out the breathing."
 
 Built and used daily for one real author's Threads/longform output (that private corpus is **not** in this repo); published here as the generalized machinery.
+
+## What coaching looks like
+
+The scorer never says `72/100`. It reads the pack (per-genre fingerprint bands measured from the author's real corpus) and emits a diagnosis per metric:
+
+```
+[sentence-rhythm] your variance 0.91 · this genre's band 0.55–0.72
+  why   : this author breathes in mid-length bursts; long-short whiplash reads as "assistant voice"
+  coach : split the 3 longest sentences; keep one long sentence per paragraph at most
+
+[question-ratio] your 0% · band 4–11%
+  why   : rhetorical questions are how this author hands the topic to the reader
+  coach : turn one flat assertion in the intro into a question
+```
+
+Band + why + coach, all generated from measured data — never from generic writing folklore.
 
 ## What's inside
 
