@@ -48,10 +48,10 @@ class TestCanonPresence(unittest.TestCase):
 
 
 class TestDetectGoldenPhrases(unittest.TestCase):
-    """LLM-Wiki 3편 발행본(the author 최종)의 실제 이음말이 탐지되어야 한다 (금맥 b)."""
+    """합성 예시(발행 시리즈와 같은 이음 구조)가 탐지되어야 한다 (금맥 b)."""
 
     def test_bookend_detected(self):
-        hits = cl.detect("정리하면, 저장은 'AI가 다닐 길(링크)을 깔아 주는 일'입니다.")
+        hits = cl.detect("정리하면, 기록은 '나중의 나에게 길을 깔아 주는 일'입니다.")
         self.assertIn("bookend", hits)
 
     def test_next_part_hook_detected(self):
@@ -59,7 +59,7 @@ class TestDetectGoldenPhrases(unittest.TestCase):
         self.assertIn("next_part_hook", hits)
 
     def test_forward_cue_detected(self):
-        hits = cl.detect("어떻게 llm wiki에 자료들을 잘 저장해야 할까요?")
+        hits = cl.detect("어떻게 사진들을 한곳에 잘 모아야 할까요?")
         self.assertIn("forward_cue", hits)
 
     def test_inter_block_transition_detected(self):
@@ -82,18 +82,18 @@ class TestAnalyzeBlocks(unittest.TestCase):
 
     # 발행본 3편 블록의 축약(경계 이음말·수미상관·다음편 훅 포함)
     PUB_BLOCKS = [
-        "2편에서 구조를 짰다면, 이제 자료를 쌓을 차례입니다. 어떻게 잘 저장해야 할까요?",
-        "AI가 llm wiki를 잘 읽으려면, 어떻게 저장돼 있어야 할까요? 우선 안 좋은 예부터 보겠습니다.",
+        "지난 글에서 틀을 짰다면, 이제 채울 차례입니다. 어떻게 잘 채워야 할까요?",
+        "도구가 기록을 잘 읽으려면, 어떻게 정리돼 있어야 할까요? 우선 안 좋은 예부터 보겠습니다.",
         "그런데 막상 저장하려고 하면 손이 꽤 많이 갑니다.",
-        "그래서 저는 knowledge-manager라는 스킬을 만들어 씁니다.",
-        "정리하면, 저장은 길을 까는 일입니다. 다음 편에서는 검색을 풀어 보겠습니다.",
+        "그래서 저는 작은 도구를 하나 만들어 씁니다.",
+        "정리하면, 기록은 길을 까는 일입니다. 다음 편에서는 찾기를 풀어 보겠습니다.",
     ]
     # 뚝뚝 끊긴 블록(이음말·수미상관·다음편 훅 없음) — 낮은 커버리지가 나와야
     ABRUPT_BLOCKS = [
         "자료를 저장하는 방법입니다.",
         "안 좋은 예부터 봅니다.",
-        "knowledge-manager를 씁니다.",
-        "GIGO 원칙이 있습니다.",
+        "작은 도구를 씁니다.",
+        "기본 원칙이 있습니다.",
     ]
 
     def test_published_blocks_have_high_bridge_coverage(self):

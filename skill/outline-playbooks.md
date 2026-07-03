@@ -1,6 +1,6 @@
 # 개요 유형화 플레이북 + 검증 게이트 (writing-assistant 차용판)
 
-> **출처**: treylom/writing-assistant (the author 지시 2026-07-03 02:51 "좋은 건 최대한 가져와서 차용 — 책 원고에도 들어갈 내용") — `gpts-output/06_outline_draft_revise_loop_v2.md`(개요→승인→초안 루프) + `skills/references/genre-playbooks.md`(장르 플레이북) + `skills/references/review-lenses.md`(4렌즈)를 the-author 4유형에 맞게 번안.
+> **출처**: adapted from an internal writing-assistant toolkit — 개요→승인→초안 루프, 장르 플레이북, 4렌즈 검토를 the-author 4유형에 맞게 번안.
 > **원칙**: 개요 유형화 = 글쓰기의 기본. **개요 승인 전에는 본문을 쓰지 않는다.**
 
 ## 0. 집필 파이프라인 (SKILL.md 집필 단계와 결합)
