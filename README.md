@@ -1,6 +1,6 @@
 # clone-n-write
 
-![clone-n-write hero](assets/hero.png)
+<!-- hero: ![clone-n-write hero](assets/hero.png) — 이미지 생성 대기, 도착 시 활성화 -->
 
 **실제 사람이 글을 쓸 때의 사고 과정을 복제하고 — 같은 기계로 그 사람이 글을 더 잘 쓰도록 코칭한다.**
 
