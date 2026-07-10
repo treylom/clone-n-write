@@ -2,3 +2,4 @@ __pycache__/
 corpus/
 *.tofugate.json
 .DS_Store
+v2-smoke-log.md
