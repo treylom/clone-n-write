@@ -2,6 +2,7 @@
 """Synthetic-only tests for the v2 exemplar registry."""
 
 from contextlib import redirect_stderr, redirect_stdout
+import hashlib
 import io
 import json
 import os
@@ -51,6 +52,20 @@ class DeterminismTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(reg.deterministic_split("어떤 글", 0.0), "train")
         self.assertEqual(reg.deterministic_split("어떤 글", 1.0), "heldout")
+
+    def test_default_split_is_three_way_and_ratio_extremes_are_exact(self):
+        observed = {reg.deterministic_split(f"v2-{index}") for index in range(100)}
+        self.assertEqual(observed, set(reg.SPLITS))
+        self.assertNotIn("heldout", observed)
+        self.assertEqual(reg.deterministic_cluster_split("cluster", (1, 0, 0)), "train")
+        self.assertEqual(reg.deterministic_cluster_split("cluster", (0, 1, 0)), "dev")
+        self.assertEqual(reg.deterministic_cluster_split("cluster", (0, 0, 1)), "final")
+
+    def test_ratios_reject_nan_and_infinity(self):
+        for ratios in ("nan,0,0", "inf,0,0", "-inf,1,0"):
+            with self.subTest(ratios=ratios):
+                with self.assertRaisesRegex(reg.RegistryError, "finite"):
+                    reg.normalize_split_ratios(ratios)
 
     def test_repeated_build_is_byte_identical_and_merges_media(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -216,7 +231,208 @@ class PullAndStatsTests(unittest.TestCase):
         self.assertEqual(stats["by_medium"]["longform"]["substance"], {"low": 1})
 
 
+class ThreeWayMigrationTests(unittest.TestCase):
+    @staticmethod
+    def _with_body(row, body, **fields):
+        row = {**row, **fields, "body": body, "chars": len(body)}
+        return row
+
+    def test_all_three_cluster_signals_are_component_invariants(self):
+        common_prefix = "근사 중복을 판별하는 충분히 긴 문장입니다. " * 12
+        rows = [
+            self._with_body(
+                _row("series-title", topic=["독립-a"]),
+                "제목에만 태그가 있는 첫 글입니다.",
+                title="[정치학, 껌이지] 1화",
+            ),
+            self._with_body(
+                _row("series-body", topic=["독립-b"]),
+                "# [정치학, 껌이지]\n본문 첫 줄의 마크다운 태그도 같은 연재입니다.",
+            ),
+            self._with_body(
+                _row("topic-a", topic=["alpha", "beta", "gamma", "delta"]),
+                "토픽 그룹 첫 번째 서로 다른 본문입니다.",
+            ),
+            self._with_body(
+                _row("topic-b", topic=["alpha", "beta", "gamma", "epsilon"]),
+                "토픽 그룹 두 번째 서로 다른 본문입니다.",
+            ),
+            self._with_body(_row("near-a", topic=[]), common_prefix + "A 결론"),
+            self._with_body(_row("near-b", topic=[]), common_prefix + "B 결론"),
+            self._with_body(
+                _row("other", topic=["다른-주제"]),
+                "[오리미중]\n어느 그룹과도 겹치지 않는 본문입니다.",
+            ),
+        ]
+        assigned = reg.assign_cluster_splits(rows)
+        by_id = {row["id"]: row for row in assigned}
+        for left, right in (
+            ("series-title", "series-body"),
+            ("topic-a", "topic-b"),
+            ("near-a", "near-b"),
+        ):
+            self.assertEqual(by_id[left]["cluster_id"], by_id[right]["cluster_id"])
+            self.assertEqual(by_id[left]["split"], by_id[right]["split"])
+        self.assertNotEqual(by_id["other"]["cluster_id"], by_id["series-title"]["cluster_id"])
+
+        reversed_assignment = reg.assign_cluster_splits(list(reversed(rows)))
+        reversed_by_id = {
+            row["id"]: (row["cluster_id"], row["split"])
+            for row in reversed_assignment
+        }
+        self.assertEqual(
+            {row_id: (row["cluster_id"], row["split"]) for row_id, row in by_id.items()},
+            reversed_by_id,
+        )
+
+    def test_resplit_is_in_place_with_exact_backup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            personas = Path(directory) / "personas"
+            path = reg.registry_path("시험", personas)
+            rows = [
+                {**_row("one", split="heldout"), "title": "[오리미중] 1화"},
+                self._with_body(
+                    _row("two", split="train"),
+                    "## [오리미중]\n두 번째 연재 본문입니다.",
+                ),
+            ]
+            reg.write_registry(rows, path)
+            before = path.read_bytes()
+            result = reg.resplit_registry("시험", (0, 1, 0), personas)
+
+            self.assertEqual(Path(result["backup"]).read_bytes(), before)
+            migrated = reg.load_registry(path)
+            self.assertEqual({row["split"] for row in migrated}, {"dev"})
+            self.assertEqual(len({row["cluster_id"] for row in migrated}), 1)
+            self.assertEqual(result["split"], {"dev": 2})
+
+    def test_pull_defaults_train_and_final_requires_explicit_unseal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            personas = Path(directory) / "personas"
+            path = reg.registry_path("시험", personas)
+            reg.write_registry(
+                [_row("train", split="train"), _row("dev", split="dev"), _row("final", split="final")],
+                path,
+            )
+            self.assertEqual(
+                [row["id"] for row in reg.pull_exemplars("시험", k=10, personas_dir=personas)],
+                ["train"],
+            )
+            self.assertEqual(
+                [row["id"] for row in reg.pull_exemplars(
+                    "시험", k=10, personas_dir=personas, split="dev"
+                )],
+                ["dev"],
+            )
+            with self.assertRaisesRegex(reg.RegistryError, "final split is sealed"):
+                reg.pull_exemplars("시험", k=10, personas_dir=personas, split="final")
+            final = reg.pull_exemplars(
+                "시험", k=10, personas_dir=personas, split="final", unseal_final=True
+            )
+            self.assertEqual([row["id"] for row in final], ["final"])
+            heldout_compat = reg.pull_exemplars(
+                "시험", k=10, include_heldout=True, personas_dir=personas
+            )
+            self.assertEqual({row["id"] for row in heldout_compat}, {"train", "dev"})
+
+    def test_add_returns_only_a_sealed_receipt_for_final(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            personas = root / "personas"
+            source = root / "final.txt"
+            source.write_text(LONG_A, encoding="utf-8")
+            receipt = reg.add_exemplar(
+                "시험", source, "threads", personas_dir=personas, ratios=(0, 0, 1)
+            )
+            self.assertEqual(receipt["split"], "final")
+            self.assertTrue(receipt["sealed"])
+            self.assertNotIn("body", receipt)
+            stored = reg.load_registry(reg.registry_path("시험", personas))
+            self.assertEqual(stored[0]["split"], "final")
+            self.assertIn("body", stored[0])
+
+    def test_incremental_add_and_build_do_not_reopen_a_sealed_final_row(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            personas = root / "personas"
+            first = next(
+                root / f"first-{index}.txt"
+                for index in range(100)
+                if reg.deterministic_cluster_split(
+                    hashlib.sha1(
+                        reg.stable_id(
+                            str((root / f"first-{index}.txt").resolve()), "threads", "add"
+                        ).encode("utf-8")
+                    ).hexdigest()
+                ) == "train"
+            )
+            first.write_text(
+                "첫 번째 예시는 실제 작업의 맥락과 판단 근거를 충분히 담아 독립적으로 작성합니다. "
+                "세부적인 결과와 한계도 차분하게 설명해 완결성을 갖춥니다.",
+                encoding="utf-8",
+            )
+            sealed = reg.add_exemplar(
+                "시험", first, "threads", personas_dir=personas, ratios=(0, 0, 1)
+            )
+            self.assertEqual(sealed["split"], "final")
+
+            second = root / "second.txt"
+            second.write_text(
+                "두 번째 예시는 다른 맥락에서 얻은 관찰과 선택의 이유를 상세히 기록합니다. "
+                "첫 번째 글과 관계없이 결과를 검토하고 다음 행동을 정리합니다.",
+                encoding="utf-8",
+            )
+            reg.add_exemplar("시험", second, "threads", personas_dir=personas)
+
+            source = root / "third.jsonl"
+            _write_jsonl(
+                source,
+                [{
+                    "url": "https://example.test/@writer/post/THIRD",
+                    "dt": "2026-01-03",
+                    "body": "세 번째 예시는 수집 과정에서 추가된 독립적인 기록입니다. "
+                            "관찰한 사실과 해석의 근거를 충분히 남겨 다음 판단에 활용합니다.",
+                }],
+            )
+            reg.build_registry("시험", source, "threads", "tk-jsonl", personas_dir=personas)
+
+            rows = reg.load_registry(reg.registry_path("시험", personas))
+            first_id = reg.stable_id(str(first.resolve()), "threads", "add")
+            self.assertEqual(
+                next(row["split"] for row in rows if row["id"] == first_id), "final"
+            )
+
+    def test_incremental_split_conflicts_keep_the_component_final(self):
+        rows = [
+            self._with_body(_row("train", split="train"), "[같은 연재] 첫 글입니다."),
+            self._with_body(_row("final", split="final"), "[같은 연재] 마지막 글입니다."),
+        ]
+        assigned = reg.assign_incremental_cluster_splits(
+            rows, {"train": "train", "final": "final"}, (1, 0, 0)
+        )
+        self.assertEqual({row["split"] for row in assigned}, {"final"})
+
+
 class CliTests(unittest.TestCase):
+    def test_resplit_cli_accepts_comma_ratios(self):
+        with tempfile.TemporaryDirectory() as directory:
+            personas = Path(directory) / "personas"
+            path = reg.registry_path("시험", personas)
+            reg.write_registry([_row("one", split="heldout")], path)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                code = reg.main([
+                    "resplit", "--persona", "시험",
+                    "--ratios", "0.7,0.15,0.15",
+                    "--personas-dir", str(personas),
+                ])
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            result = json.loads(stdout.getvalue())
+            self.assertEqual(result["ratios"], {"train": 0.7, "dev": 0.15, "final": 0.15})
+            self.assertTrue(Path(result["backup"]).is_file())
+
     def test_stats_json_and_add_cli(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -17,12 +17,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import structure_profiler as sp  # noqa: E402
 
 
-def _row(body, medium="스레드", genre="정보", level="ok"):
+def _row(body, medium="스레드", genre="정보", level="ok", split="train"):
     return {
         "body": body,
         "medium": medium,
         "genre": genre,
         "substance": {"level": level},
+        "split": split,
     }
 
 
@@ -54,6 +55,8 @@ class LoadingTests(unittest.TestCase):
             },
             _row("다른 매체 문장이다.", medium="블로그"),
             _row("알맹이가 부족한 문장이다.", level="thin"),
+            _row("개선 측정용 문장이다.", split="dev"),
+            _row("봉인 평가용 문장이다.", split="final"),
             {
                 "body": "조건이 빠진 문장이다.",
                 "medium": "스레드",
@@ -65,6 +68,7 @@ class LoadingTests(unittest.TestCase):
                 "medium": "스레드",
                 "genre": "사색",
                 "substance": {"level": "ok"},
+                "split": "train",
             },
         ]
         with tempfile.TemporaryDirectory() as directory:
@@ -189,7 +193,9 @@ class ProfileSchemaTests(unittest.TestCase):
 
     def test_no_genre_labels_omits_cells(self):
         profile = sp.build_profile(
-            [{"body": "라벨 없는 문장이다."}], medium="스레드", persona="시험"
+            [{"body": "라벨 없는 문장이다.", "split": "train"}],
+            medium="스레드",
+            persona="시험",
         )
         self.assertNotIn("genres", profile)
 

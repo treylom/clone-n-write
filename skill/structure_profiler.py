@@ -33,12 +33,14 @@ interpolation at ``(n - 1) * q`` (the common inclusive/type-7 definition).
 Input contract::
 
     personas/<persona>/exemplars.jsonl
-    {"body": "...", "medium": "threads", "genre": "정보",
+    {"body": "...", "medium": "threads", "genre": "정보", "split": "train",
      "substance": {"level": "ok"}}
 
-Only rows for the requested medium whose ``substance.level`` is exactly ``ok``
-are measured.  ``body`` is canonical; ``text`` and ``content`` are tolerated as
-fallbacks for older data.  The CLI writes
+Only ``train`` rows for the requested medium whose ``substance.level`` is
+exactly ``ok`` are measured.  This keeps dev/final evaluation data out of every
+derived structure pack after the registry's three-way migration. ``body`` is
+canonical; ``text`` and ``content`` are tolerated as fallbacks for older data.
+The CLI writes
 ``personas/<persona>/packs/structure-<medium>.json``.
 """
 
@@ -345,8 +347,8 @@ def load_exemplars(
     """Load and filter one persona's JSONL exemplar file.
 
     Malformed JSON and eligible rows without a usable body fail with a line-aware
-    ``ProfileError``.  Rows for other media or without measured-ok substance are
-    intentionally ignored.
+    ``ProfileError``. Rows outside ``train``, for other media, or without
+    measured-ok substance are intentionally ignored.
     """
 
     path = Path(exemplars_path)
@@ -369,6 +371,8 @@ def load_exemplars(
                 raise ProfileError("%s:%d: exemplar must be an object" % (path, line_number))
             substance = row.get("substance")
             if row.get("medium") != medium:
+                continue
+            if row.get("split") != "train":
                 continue
             if not isinstance(substance, dict) or substance.get("level") != "ok":
                 continue
