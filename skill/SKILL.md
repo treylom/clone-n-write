@@ -1,7 +1,7 @@
 ---
 name: clone-n-write
 description: Use when drafting or reworking posts in a specific person's voice AND structure. Onboarding interview + graded exemplar registry + skeleton-anchored outlines + non-compensatory style/structure diagnostics + blind A/B harness.
-version: 2.1.0
+version: 2.1.1
 ---
 
 # clone-n-write v2 (generalized template)
