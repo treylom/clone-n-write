@@ -1,7 +1,7 @@
 ---
 name: clone-n-write
 description: Use when drafting or reworking posts in a specific person's voice AND structure. Onboarding interview + graded exemplar registry + skeleton-anchored outlines + non-compensatory style/structure diagnostics + blind A/B harness.
-version: 2.0.0
+version: 2.1.0
 ---
 
 # clone-n-write v2 (generalized template)
@@ -26,18 +26,19 @@ Every writing session loads this file first; hosts that persist context re-injec
 ## Writing pipeline (v2)
 
 1. **Load persona**: `author-interview.json` + packs (`personas/<name>/packs/`).
-2. **Message first** — one sentence: what should remain with the reader (most authors think message-first; confirm via interview).
-3. **Genre typing** — classify against the persona's measured genre set.
-4. **[G1] Skeleton-anchored outline** — pull 1–2 *real* same-genre pieces (`registry.py pull`, grade-first; `skeleton_extract.py` for the slot map) and map the message onto their skeleton slots (opening subtype / development moves / transition / closing subtype). The outline names its anchor (`skeleton_anchor: <ref> — <slot mapping>`). Generic genre templates (`outline-playbooks.md`) are fallback only, and say so.
+2. **Working brief** — keep a 9-field brief alive through the session (kind / purpose / reader / medium / length / materials / style basis / current stage / open gaps); refresh it on scope changes. It prevents context drift on long sessions and cuts repeated questions (ask few, decisive ones; when the author is stuck, offer 2–4 directions with one recommendation instead of more questions).
+3. **Message first** — one sentence: what should remain with the reader (most authors think message-first; confirm via interview).
+4. **Genre typing** — classify against the persona's measured genre set.
+5. **[G1] Skeleton-anchored outline** — pull 1–2 *real* same-genre pieces (`registry.py pull`, grade-first; `skeleton_extract.py` for the slot map) and map the message onto their skeleton slots (opening subtype / development moves / transition / closing subtype). The outline names its anchor (`skeleton_anchor: <ref> — <slot mapping>`). Generic genre templates (`outline-playbooks.md`) are fallback only, and say so.
    - **Diversity guard**: across a batch, rotate anchors and subtypes — one anchor repeated mechanically is itself an AI tell.
-5. **[G2] Outline approval (hard)** — no prose before approval (author, or explicit self-approval for autonomous runs).
-6. **Draft by borrowing** — quote-level borrowing from published `train` pieces; frontmatter records `차용:` provenance.
-7. **[G3] 4-lens review** — structural → reader → skeptic/fact → voice (voice last).
-8. **Two non-compensatory diagnostic axes**:
+6. **[G2] Outline approval (hard)** — no prose before approval (author, or explicit self-approval for autonomous runs).
+7. **Draft by borrowing** — quote-level borrowing from published `train` pieces; frontmatter records `차용:` provenance.
+8. **[G3] 4-lens review** — structural → reader → skeptic/fact → voice (voice last).
+9. **Two non-compensatory diagnostic axes**:
    - style axis: `check_endings.py` (deterministic ending gate) + `band_scorer.py` (percentile-calibrated style bands; flags `over_typical` — *more author-like than the author* is an AI signal, and `insufficient_sample` on short pieces);
    - structure axis: `structure_scorer.py` (persona×medium L2 bands: paragraph/line rhythm, sentence-length spread, device placement; optional skeleton adherence via `--skeleton`).
    High style cannot compensate a structure miss, and vice versa. Output is diagnostic with 대역+왜+코칭, never a bare score.
-9. **[Gate] `gate.py`** — deterministic: ending distribution, borrow-quote presence, base provenance, AI-cliché two-tier (`--mode copy` for persona fidelity, `--mode universal` for stricter general polish).
+10. **[Gate] `gate.py`** — deterministic: ending distribution, borrow-quote presence, base provenance, AI-cliché two-tier (`--mode copy` for persona fidelity, `--mode universal` for stricter general polish).
 
 ## Verification — blind A/B harness (the real test)
 
@@ -63,6 +64,9 @@ Four layers keep the skill dual-host:
 ## Design rules
 
 - **Structure is first-class**: an outline without a real-piece anchor is a bug, not a draft.
+- **Purpose over style** (the author's own craft hierarchy): style joins from the outline stage, but purpose / reader / genre rules always outrank it. When a fidelity device hurts delivery, drop the device — blind panels punish mechanically repeated devices as AI tells, so this hierarchy *raises* pass rates rather than trading against them. Revise order is fixed: purpose → structure → logic/evidence → reader → sentences → style (polish last; never start with automatic sentence polish).
+- **Style intensity is declared**: cloning defaults to *strong* (structural habits, rhythm, narrative distance). Offer weak (feel only) / medium (word choice, breath, transitions) when the goal is "my message, lightly in their tone"; record the chosen intensity in the outline frontmatter and step down one level when strong-mode devices start violating the purpose hierarchy.
+- **Rework path = reverse outline first**: for existing drafts, summarize each paragraph's role (same `skeleton_extract.py` slot map), mark duplicates / weak links / reorder wins, then repair only the named scope — never rewrite from scratch by default (`outline-playbooks.md` §6).
 - **Flexible by constitution**: bands are ranges; out-of-band triggers diagnosis, not auto-reject. Hard gates only for identity (provenance) and readers (cliché flooding).
 - **Own-corpus ground truth**: never import folklore bans or another author's bands; match the corpus text representation exactly.
 - **Typos/looseness are not style to copy mechanically** — spontaneity can't be faked by insertion; treat as report-only signals.
