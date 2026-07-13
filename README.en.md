@@ -83,6 +83,7 @@ This repo ships the **machinery, not the person**. To use it for a real persona 
 - **Copy mode vs. universal mode.** Full-fidelity persona copying (`--mode copy`) tolerates the author's own quirks even where generic "good writing" advice wouldn't; `--mode universal` is the stricter general-purpose variant. Personal fidelity and universal polish are different objectives — pick one per run.
 - **Corpus hygiene decides your numbers.** Measured in the wild: crawler-left channel/date lines at the head of 92% of one corpus plus 8 near-duplicate recaptures silently biased every fingerprint number (words/sentence, rhythm CV, ending ratios) while the discrimination ordering survived. `build_corpus.py` now ships boilerplate-line detection and near-dup dropping — watch its ⚠️ hygiene warnings when you wire a new corpus.
 - **Outline first, always.** The single highest-leverage gate is refusing to draft before a genre-typed outline is approved. For new pieces the outline itself is built interactively (2–3 direction candidates → author picks → template-filled draft outline → author refines).
+- **The acceptance test is a blind pairwise panel.** Judges primed on the author's real pieces pick clone vs. plain counterpart ("neither" allowed). Our repair loop took one persona from 72.3% to 91.8% (fresh set) / 89.9% (regenerated set, 19/20 pair majorities) — and found that post-hoc repair plateaus while baking verified rules into generation crosses the bar. Full process record: [docs/making-of.md](docs/making-of.md).
 
 ## Quickstart
 
