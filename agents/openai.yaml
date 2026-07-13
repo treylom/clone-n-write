@@ -1,0 +1,10 @@
+interface:
+  display_name: "Clone N Write"
+  short_description: "Clone writing process and coach measurable style"
+  default_prompt: "Use $clone-n-write with a dummy persona to test the onboarding, outline, and deterministic gate workflow."
+
+policy:
+  allow_implicit_invocation: false
+
+dependencies:
+  tools: []
