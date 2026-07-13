@@ -1,7 +1,7 @@
 ---
 name: clone-n-write
 description: Use when drafting or reworking posts in a specific person's voice AND structure. Onboarding interview + graded exemplar registry + skeleton-anchored outlines + non-compensatory style/structure diagnostics + blind A/B harness.
-version: 2.1.1
+version: 2.2.0
 ---
 
 # clone-n-write v2 (generalized template)
@@ -40,9 +40,22 @@ Every writing session loads this file first; hosts that persist context re-injec
    High style cannot compensate a structure miss, and vice versa. Output is diagnostic with 대역+왜+코칭, never a bare score.
 10. **[Gate] `gate.py`** — deterministic: ending distribution, borrow-quote presence, base provenance, AI-cliché two-tier (`--mode copy` for persona fidelity, `--mode universal` for stricter general polish).
 
-## Verification — blind A/B harness (the real test)
+## Verification — pairwise blind A/B (the real test)
 
-Self-scores are diagnostics. The acceptance test is a **blind panel**: mix ≥20 generated pieces with real controls (train split only — never spend sealed `final` pieces on rounds), unlabeled, in the *corpus representation*; ≥10 independent judges, each holding a different reference set of real pieces (controls excluded), vote authentic/fake + author attribution; a blind coordinator (not the generator) assembles packets and holds the answer key (hash-committed before verdicts). Calibration gate: judges must catch controls (<70% control accuracy voids the round). Loop generation→panel→coaching until the target pass rate; claims about the persona only from the sealed `final` split with a CI.
+Self-scores are diagnostics. The acceptance test is a **reference-primed pairwise panel** (author-specified design):
+1. **Prime the judges**: every judge first studies a reference set of the author's *real* pieces (length-stratified, ~15; train split only — never spend sealed `final` pieces on rounds), presented as verbatim files.
+2. **A/B pairs**: for each generated piece, produce a *plain counterpart* — same topic, written with **no persona conditioning** (topic extracted as a neutral brief so no phrasing leaks). Judges see each pair blind (deterministic side-flips per judge) and answer: which one is the author's style — **A / B / neither**. Never force a pick; "neither" counts against the clone.
+3. **Metric**: clone vote share and pair-majority wins, against the author's target (default ≥90%). Vote hygiene: drop degenerate votes (placeholder reasons, schema failures) and report the dropped count — a noisy panel is a finding, not a shrug.
+4. Absolute real-vs-generated panels (with real controls + calibration gate) remain a *final-claim* instrument on the sealed `final` split with a CI — not the improvement loop's primary meter.
+
+## Repair loop (panel → corpus-verified tells → data-layer fix)
+
+Each round below target feeds the next repair — this loop is the product as much as the prose is:
+1. **Collect every losing-vote reason** (and `style_cues`) from the panel — that is the diagnosis corpus.
+2. **Verify each candidate tell against the author's own corpus** before acting: measure its frequency in real pieces vs generated ones (e.g. a punctuation mark at 0/350 real vs 4/20 generated = hard ban; a device the author does use, just less, = genre-conditioned or soft). Judge claims are hypotheses, not rules — own-corpus ground truth decides.
+3. **Persist verified tells to the persona data layer** — the interview's taboo slot (`Q7`) with provenance (which round, which evidence, real-vs-generated counts) and an `enforcement` grade (hard / soft / report-only). **Never patch skill code with persona-specific bans.**
+4. **Repair pass**: rewrite generated pieces surface-only (content, borrowing, facts, length invariant) applying the persisted rules — or regenerate if the miss is structural. Then next round with fresh judges.
+5. Stop at target; keep the skill light — prefer *replacing* a wrong rule over adding a new one, and re-check skill size each cycle.
 
 ## Host contract (Claude Code + ChatGPT Work)
 
