@@ -1,0 +1,14 @@
+{
+  "name": "clone-n-write",
+  "version": "2.2.0",
+  "description": "Clone a real person's writing process, structure, and measurable style with deterministic coaching gates.",
+  "author": {
+    "name": "Trey Lom",
+    "url": "https://github.com/treylom"
+  },
+  "homepage": "https://github.com/treylom/clone-n-write",
+  "repository": "https://github.com/treylom/clone-n-write",
+  "license": "MIT",
+  "keywords": ["writing", "style", "coaching", "persona"],
+  "skills": ["./skills/"]
+}

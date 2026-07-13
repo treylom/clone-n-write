@@ -1,0 +1,20 @@
+{
+  "name": "clone-n-write-marketplace",
+  "owner": {
+    "name": "treylom"
+  },
+  "metadata": {
+    "description": "Marketplace catalog for the clone-n-write writing coaching plugin",
+    "version": "2.2.0",
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "clone-n-write",
+      "source": "./",
+      "description": "Clone a real person's writing process, structure, and measurable style with deterministic coaching gates.",
+      "version": "2.2.0",
+      "keywords": ["writing", "style", "coaching", "persona"]
+    }
+  ]
+}
