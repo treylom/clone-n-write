@@ -10,6 +10,13 @@ version: 2.2.0
 
 > Generalized public template. All persona data lives under `personas/<name>/` (never ship a real person's data in public forks). Calibrate every number against **your** author's corpus.
 
+## Session start — persona resolution (run this before anything else)
+
+1. **Resolve the data root**, in this order: an explicit `--personas-dir` argument → a `personas/` directory in the current working directory → the skill's bundled `personas/` as last resort. **Never store author data inside a plugin cache** — caches are wiped on update; if the skill is running from one, create and use `./personas/` in the user's workspace instead. Hosts without a persistent filesystem (chat sandboxes): treat persona data as session-scoped — ask the author to paste/attach their profile at start, and hand every artifact back at the end for them to keep. Committing or pushing results anywhere is always the author's own workflow, never automated here.
+2. **Pick the persona**: list `personas/*/`. Exactly one → auto-select and say which. Several → ask the author. None → this is a new persona; go to Step 0.
+3. **Load-or-interview branch**: if `personas/<name>/author-interview.json` exists, load it (plus `packs/`) and **skip Step 0**; run the interview only when the file is missing, and re-run it only on the author's explicit request.
+4. **Self-contained by design**: building a corpus needs nothing beyond the author's published texts as plain files — `registry.py build` ingests them directly. No knowledge-management stack or external service is assumed.
+
 ## Step 0 — Onboarding interview (once per persona)
 
 Ask the author ~8 questions and persist to `personas/<name>/author-interview.md` (+ `.json` mirror for tools):
