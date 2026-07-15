@@ -1,3 +1,7 @@
 *
 !.gitignore
 !README.md
+!tofukyung/
+tofukyung/*
+!tofukyung/style-profile.md
+!tofukyung/signature-catalog.md
