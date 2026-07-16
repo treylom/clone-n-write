@@ -31,12 +31,15 @@ Every line of `exemplars.jsonl` is one UTF-8 JSON object:
   "date": "source date or an empty string",
   "topic_keys": ["up to eight approximate noun-like tokens"],
   "skeleton": null,
-  "split": "train|heldout"
+  "split": "train|dev|final"
 }
 ```
 
-The split is a deterministic threshold over `sha1(id)`. `pull` excludes both
-heldout and low-substance rows unless their separate opt-in flags are provided.
+Splits are assigned deterministically (SHA1-based, topic-clustered so related
+pieces stay on one side of an evaluation boundary). `pull` returns `train` rows
+only by default; `dev` is for diagnostics, `final` is sealed for claims and no
+row from it is returned without the explicit unseal opt-in. Low-substance rows
+are likewise excluded unless their opt-in flag is provided.
 Structure packs use schema `struct-v1` and proof class `corpus-measured`.
 
 No real persona text belongs in this tracked README.

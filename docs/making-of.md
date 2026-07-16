@@ -17,7 +17,7 @@ The author then corrected the design itself:
 3. Repair the skill until the clone wins 90%+, and report *why* each losing vote happened.
 4. Keep the skill light while doing it.
 
-Deterministic side-flips per judge, answer key stored separately from the blinded files. This relative design is what the "Verification" section of `skill/SKILL.md` now specifies.
+Deterministic side-flips per judge, answer key stored separately from the blinded files. This relative design is what the "Verification" section of `skills/clone-n-write/SKILL.md` now specifies.
 
 ## The repair loop — judge claims are hypotheses, the corpus decides
 
