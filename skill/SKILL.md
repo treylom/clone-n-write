@@ -21,6 +21,7 @@ version: 2.2.0
 
 Ask the author ~8 questions and persist to `personas/<name>/author-interview.md` (+ `.json` mirror for tools):
 thinking origin (message-first? scene-first?) / "what feels off" signals / seed pieces they consider their best (with why) / medium→structure mapping / appeal of the clone target in 3 axes / noise criteria / must-keep & never-use expressions / imagined reader.
+**Delivery: one batched message.** Send all ~8 as a single numbered list the author answers in one reply (partial answers fine — follow up only on gaps). Do not drip them one per turn, and do not skip the interview just because the author already named a piece they want to write — capture the piece request, run the batch, then start the piece. Hosts without interactive question widgets (Codex CLI, plain chat): the numbered plain-text list *is* the widget.
 Every writing session loads this file first; hosts that persist context re-inject it at session start. The interview is the author's *tacit knowledge* — treat it as spec, not decoration.
 
 ## Data layer — exemplar registry (not a flat corpus)
@@ -33,7 +34,7 @@ Every writing session loads this file first; hosts that persist context re-injec
 ## Writing pipeline (v2)
 
 1. **Load persona**: `author-interview.json` + packs (`personas/<name>/packs/`).
-2. **Working brief** — keep a 9-field brief alive through the session (kind / purpose / reader / medium / length / materials / style basis / current stage / open gaps); refresh it on scope changes. It prevents context drift on long sessions and cuts repeated questions (ask few, decisive ones; when the author is stuck, offer 2–4 directions with one recommendation instead of more questions).
+2. **Working brief** — keep a 9-field brief alive through the session (kind / purpose / reader / medium / length / materials / style basis / current stage / open gaps); refresh it on scope changes. **Piece kickoff = one batched brief.** When the author asks for a specific piece, collect every unknown brief field in a single numbered message (typically 3–6 questions at once, same batch style as Step 0) instead of one question per turn — one round trip, then write. Fields already known from the interview, the request itself, or earlier in the session are never re-asked. *After* kickoff, keep questions rare and decisive; when the author is stuck, offer 2–4 directions with one recommendation instead of more questions.
 3. **Message first** — one sentence: what should remain with the reader (most authors think message-first; confirm via interview).
 4. **Genre typing** — classify against the persona's measured genre set.
 5. **[G1] Skeleton-anchored outline** — pull 1–2 *real* same-genre pieces (`registry.py pull`, grade-first; `skeleton_extract.py` for the slot map) and map the message onto their skeleton slots (opening subtype / development moves / transition / closing subtype). The outline names its anchor (`skeleton_anchor: <ref> — <slot mapping>`). Generic genre templates (`outline-playbooks.md`) are fallback only, and say so.
