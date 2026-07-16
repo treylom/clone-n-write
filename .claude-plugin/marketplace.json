@@ -1,0 +1,17 @@
+{
+  "name": "clone-n-write",
+  "description": "Clone a real person's writing process, structure, and measurable style with deterministic coaching gates.",
+  "owner": {
+    "name": "tofukyung",
+    "url": "https://github.com/treylom"
+  },
+  "plugins": [
+    {
+      "name": "clone-n-write",
+      "description": "Clone a real person's writing process, structure, and measurable style with deterministic coaching gates.",
+      "source": ".",
+      "version": "2.2.0",
+      "keywords": ["writing", "style", "coaching", "persona"]
+    }
+  ]
+}
